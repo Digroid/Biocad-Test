@@ -4,39 +4,27 @@ import pandas as pd
 import statistics
 from datetime import datetime
 
-#Чтение файла, удаление первой строки, которая является пояснением к столбцам для удобства обработки и сбрасываю порядковые номера строк
-#так как была удалена строка с индексом ноль
+#Чтение файла
 a = pd.read_excel("C:\\Users\\Sidodji\\Downloads\\TEST.xlsx")
+
+#Удаление первой строки, которая является пояснением к столбцам для удобства обработки и происходит сброс порядковых номеров строк
 a = a.drop(index = [0])
 a = a.reset_index(drop = True)
 
-#Функция для записи по визитно в файл. x и y - отфильтрованные таблицы(DATAFRAMEы) по визиту и лечебной группе #
-то есть одной переменной соответствует таблица с одним визитом и одной лечебной группой, а второй другая лечебная группа
-def pizda(x, y, z):
+#Функция для записи по визитно в файл. x и y - отфильтрованные таблицы(DATAFRAMEы) по визиту и лечебной группе 
+#то есть переменной x соответствует таблица одного визита первой лечебной группы, переменной y - второй лечебной группы
+
+def write_in_file(x, y, z):
 
     file.write(f"Visit {z} \n")
-        
     file.write("N  " + str(len(x)) + "  " + str(len(y)) + "\n") 
-    
     file.write("Mean " + str(round(x.mean(), 1)) + "  " + str(round(y.mean(), 1)) + "\n")
-    
     file.write("Standard deviation  " + str(round(statistics.stdev(x),2)) + "  " + str(round(statistics.stdev(y),2)) + "\n")
-    
     file.write("Min  " + str(round(x.min())) + "  " + str(round(y.min())) + "\n")
-    
     file.write("Max  " + str(round(x.max())) + "  " + str(round(y.max())) + "\n" + "\n")
     
-#Функция для проверки данных и для вывода в консоль той же инфы, что и предыдущая функция. На эту функцию можно не смотреть
-def hui(x, y):
-    print("Visit 1 Statistics")
-    print("N       ", len(x), "       ", len(y))
-    print("Mean ", round(x.mean(), 1) , "    ", round(y.mean(), 1))
-    print("Standard deviation ", round(statistics.stdev(x),2), "    ", round(statistics.stdev(y),2))
-    print("Min ", round(x.min()), "   ", round(y.min()))
-    print("Max ", round(x.max()), "   ", round(y.max()))
-    print("\n")
-#Создание пустого массива и поочередный перебор всех ячеек. Если у ячейки формат дата-время, то преобразуем в необходимый нам формат числа,
-#в противном случаем добавляем в массив идем по всем ячейкам стобцам с результатами и либо преобразуем значения
+#Создание пустого массива и поочередный перебор всех ячеек столбца результат (AVAL). Если у ячейки формат дата-время, то преобразуем в необходимый нам формат и добавляем в массив,
+#Если же у ячейки другой формат, то без преобразования добавляем в массив
 AVAL2 = [] 
 for i in a.AVAL:
     if str(type(i)) == "<class 'datetime.datetime'>":
@@ -45,16 +33,19 @@ for i in a.AVAL:
         AVAL2.append(b)
     else:
         AVAL2.append(i)
-#Перезапись стобец AVAL в необходимый для расчетов формат
+        
+#Перезапись столбца AVAL 
 for y in range(len(a)):
     a.loc[(y),"AVAL"] = AVAL2[y]
 
-# все ячейки столбца AVAL в формат int, если ячейка не преобразуется, то в нее записывается NaN(Not a number) и строки с таким результатом стираются
-
+#Все ячейки столбца AVAL преобразуем в формат числа (int или float) для расчетов, если ячейка пустая или в ней записано значение,
+#которое не является числом, то в нее записывается аббревиатура NaN (Not a number)
 a["AVAL"] = pd.to_numeric(a["AVAL"],errors='coerce')
+
+#Удаление всех строк, где  значение ячейки результат NaN
 a.dropna(subset = ["AVAL"], inplace = True)
 
-#Фильтруем таблицу для того, чтобы посчитать количество клиентов в каждой группе по уникальному ID(SUBJIB)
+#Сортируем таблицу для того, чтобы посчитать количество клиентов в каждой группе по уникальному ID(SUBJIB)
 num_1 = a[(a["PARAMCD"] == "EFF01")& (a["TRTGRPN"] == 1)& (a["ITTFL"] == 1)]
 num_2 = a[(a["PARAMCD"] == "EFF01")& (a["TRTGRPN"] == 2)& (a["ITTFL"] == 1)]
 
@@ -62,6 +53,7 @@ num_1_trtgrp = len(num_1["SUBJID"].unique())
 num_2_trtgrp = len(num_2["SUBJID"].unique())
 
 #Создаем и инициализируем 6 переменных, для каждого из трех визитов, для двух лечебных групп
+
 #Группа номер 1
 vis_1_trtgrp_1 = a[(a["TRTGRPN"]==1) & (a["VISIT"]== "Visit 1") & (a["ITTFL"]== 1) & (a["PARAMCD"]== "EFF01")]
 vis_2_trtgrp_1 = a[(a["TRTGRPN"]==1) & (a["VISIT"]== "Visit 2") & (a["ITTFL"]== 1) & (a["PARAMCD"]== "EFF01")]
@@ -73,20 +65,21 @@ vis_2_trtgrp_2 = a[(a["TRTGRPN"]==2) & (a["VISIT"]== "Visit 2") & (a["ITTFL"]== 
 vis_3_trtgrp_2 = a[(a["TRTGRPN"]==2) & (a["VISIT"]== "Visit 3") & (a["ITTFL"]== 1) & (a["PARAMCD"]== "EFF01")]
 
 print("\n")
-#Вот это для вывода в консоль полученных данных можно закомментировать, либо посмотреть что запишется в файл не открывая файл
-hui(vis_1_trtgrp_1.AVAL, vis_1_trtgrp_2.AVAL)
+
+#Реализация функции для вывода данных в консоль
+console_output(vis_1_trtgrp_1.AVAL, vis_1_trtgrp_2.AVAL)
 print(vis_1_trtgrp_1[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]], )
 print("\n")
 print(vis_1_trtgrp_2[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]])
 print("\n")
 
-hui(vis_2_trtgrp_1.AVAL, vis_2_trtgrp_2.AVAL)
+console_output(vis_2_trtgrp_1.AVAL, vis_2_trtgrp_2.AVAL)
 print(vis_1_trtgrp_1[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]], )
 print("\n")
 print(vis_1_trtgrp_2[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]])
 print("\n")
 
-hui(vis_3_trtgrp_1.AVAL, vis_3_trtgrp_2.AVAL)
+console_output(vis_3_trtgrp_1.AVAL, vis_3_trtgrp_2.AVAL)
 print(vis_1_trtgrp_1[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]], )
 print("\n")
 print(vis_1_trtgrp_2[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]])
@@ -94,14 +87,18 @@ print("\n")
 
 #Открываем(создаем, если нет такого файла) и записываем поверх (a - append)
 file = open("results.txt", "a")
+
 #Записываем заголовок для файла
 file.write("Table: Summary of Efficacy Parameter 1 by Visit. Intention-to-Treat population \n" +
-           "Number of clients in first group = "+str(num_1_trtgrp)+
-           " Number of clients in second group = "+str(num_2_trtgrp)+"\n")
-#Активируем наши функции записи в файл, указывая две таблицы с одним визитом, но разными лечебными группами
-pizda(vis_1_trtgrp_1.AVAL, vis_1_trtgrp_2.AVAL, 1)
+           "Treatment group 1 (N = "+str(num_1_trtgrp)+
+           " Treatment group 2 (N =  "+str(num_2_trtgrp)+"\n")
+           
+#Записивыем повизитно полученные данные в файл
+write_in_file(vis_1_trtgrp_1.AVAL, vis_1_trtgrp_2.AVAL, 1)
 
-pizda(vis_2_trtgrp_1.AVAL, vis_2_trtgrp_2.AVAL, 2)
+write_in_file(vis_2_trtgrp_1.AVAL, vis_2_trtgrp_2.AVAL, 2)
 
-pizda(vis_3_trtgrp_1.AVAL, vis_3_trtgrp_2.AVAL, 3)
+write_in_file(vis_3_trtgrp_1.AVAL, vis_3_trtgrp_2.AVAL, 3)
+
+#Закрываем файл
 file.close()
