@@ -66,25 +66,6 @@ vis_3_trtgrp_2 = a[(a["TRTGRPN"]==2) & (a["VISIT"]== "Visit 3") & (a["ITTFL"]== 
 
 print("\n")
 
-#Реализация функции для вывода данных в консоль
-console_output(vis_1_trtgrp_1.AVAL, vis_1_trtgrp_2.AVAL)
-print(vis_1_trtgrp_1[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]], )
-print("\n")
-print(vis_1_trtgrp_2[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]])
-print("\n")
-
-console_output(vis_2_trtgrp_1.AVAL, vis_2_trtgrp_2.AVAL)
-print(vis_1_trtgrp_1[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]], )
-print("\n")
-print(vis_1_trtgrp_2[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]])
-print("\n")
-
-console_output(vis_3_trtgrp_1.AVAL, vis_3_trtgrp_2.AVAL)
-print(vis_1_trtgrp_1[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]], )
-print("\n")
-print(vis_1_trtgrp_2[["SUBJID", "VISIT", "TRTGRPN", "AVAL","PARAMCD", "ITTFL"]])
-print("\n")
-
 #Открываем(создаем, если нет такого файла) и записываем поверх (a - append)
 file = open("results.txt", "a")
 
